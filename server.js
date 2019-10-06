@@ -1,11 +1,11 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+const userHandler = require("./userHandler");
+const cors = require('cors');
 
-const cors = require('cors')
-
-const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+const mongoose = require('mongoose');
+//mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
 
 app.use(cors())
 
@@ -17,6 +17,31 @@ app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
+
+mongoose
+  .connect(process.env.MLAB_URI, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true
+  })
+  .then(() => console.log('DB connection successful!'));
+
+
+// If the user adds a new username to the database:
+app.post("/api/exercise/new-user", userHandler.addUser);
+
+
+// If the user tries to add exercises to a given username in the database:
+app.post("/api/exercise/add", userHandler.addExercise);
+
+
+// If the user asks to GET all the users in the database:
+app.get("/api/exercise/users", userHandler.getAllUsers);
+
+
+// If the user wants to GET the full exercise record for a given username:
+app.get("/api/exercise/log", userHandler.getAllExercises);
 
 
 // Not found middleware
